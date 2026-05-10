@@ -364,9 +364,11 @@ public class PlanoCartesiano extends Canvas {
         String tipoRecta = "";
 
         String descripcion = "";
+        
+        double epsilon = 0.0001;
 
         // SECANTE
-        if (discriminante > 0) {
+        if (discriminante > epsilon) {
 
             double x1 =
                     (-B + Math.sqrt(discriminante))
@@ -393,7 +395,7 @@ public class PlanoCartesiano extends Canvas {
         }
 
         // TANGENTE
-        else if (discriminante == 0) {
+        else if (Math.abs(discriminante) <= epsilon) {
 
             double x =
                     -B / (2 * A);
