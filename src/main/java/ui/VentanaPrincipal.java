@@ -28,65 +28,140 @@ import javafx.stage.Stage;
 import math.FuncionExpresion;
 import render.PlanoCartesiano;
 
+/**
+ * Clase encargada de construir y mostrar
+ * la ventana principal de la aplicación.
+ *
+ * Esta clase administra:
+ *
+ * - El plano de funciones matemáticas.
+ * - El plano de geometría analítica.
+ * - Los controles gráficos de interacción.
+ * - Los eventos de los botones.
+ * - La creación de la interfaz JavaFX.
+ */
 public class VentanaPrincipal {
 
+    /**
+     * Plano utilizado para graficar funciones.
+     */
     private PlanoCartesiano planoFunciones;
 
+    /**
+     * Plano utilizado para geometría analítica.
+     */
     private PlanoCartesiano planoGeometria;
-    
+
+    /**
+     * Método encargado de construir y mostrar
+     * toda la interfaz principal.
+     *
+     * @param stage Ventana principal de JavaFX.
+     */
     public void mostrar(Stage stage) {
-        
+
+        // Contenedor principal
         BorderPane root = new BorderPane();
 
-        planoFunciones = new PlanoCartesiano(800, 600);
-        
-        planoGeometria = new PlanoCartesiano(800, 600);
-        
+        // =========================
+        // CREACIÓN DE PLANOS
+        // =========================
+
+        planoFunciones =
+                new PlanoCartesiano(800, 600);
+
+        planoGeometria =
+                new PlanoCartesiano(800, 600);
+
+        // Activar modo funciones
         planoFunciones.setModoFunciones(true);
 
+        // Desactivar funciones para usar geometría
         planoGeometria.setModoFunciones(false);
-        
-        Circulo circulo = new Circulo(2, 1, 3);
+
+        // =========================
+        // OBJETOS GEOMÉTRICOS
+        // =========================
+
+        // Crear círculo inicial
+        Circulo circulo =
+                new Circulo(2, 1, 3);
 
         planoGeometria.agregarObjeto(circulo);
-        
-        Recta recta = new Recta(1, 0);
+
+        // Crear recta inicial
+        Recta recta =
+                new Recta(1, 0);
 
         planoGeometria.agregarObjeto(recta);
 
-        // Campos
-        TextField txtFuncion = new TextField("x^2");
-        
-        TextField txtH = new TextField("2");
+        // =========================
+        // CAMPOS DE TEXTO
+        // =========================
 
-        TextField txtK = new TextField("1");
+        // Campo para función matemática
+        TextField txtFuncion =
+                new TextField("x^2");
 
-        TextField txtRadio = new TextField("3");
+        // Datos del círculo
+        TextField txtH =
+                new TextField("2");
 
-        TextField txtM = new TextField("1");
+        TextField txtK =
+                new TextField("1");
 
-        TextField txtB = new TextField("0");
-        
-        Button btnActualizar = new Button("Actualizar");
+        TextField txtRadio =
+                new TextField("3");
 
+        // Datos de la recta
+        TextField txtM =
+                new TextField("1");
+
+        TextField txtB =
+                new TextField("0");
+
+        // =========================
+        // BOTONES
+        // =========================
+
+        Button btnActualizar =
+                new Button("Actualizar");
+
+        Button btnGraficar =
+                new Button("Graficar");
+
+        // Ajustar tamaño del campo función
         txtFuncion.setPrefWidth(300);
-        
-        Button btnGraficar = new Button("Graficar");
+
+        // =========================
+        // CONTENEDORES
+        // =========================
 
         HBox controles = new HBox(10);
 
         controles.setPadding(new Insets(10));
-        
+
+        // Sistema de pestañas
         TabPane tabPane = new TabPane();
-        
-        Tab tabFunciones = new Tab("Funciones");
-        
-        Tab tabGeometria = new Tab("Geometría");
-        
-        VBox panelFunciones = new VBox(10);
-        
-        VBox panelGeometria = new VBox(10);
-        
+
+        Tab tabFunciones =
+                new Tab("Funciones");
+
+        Tab tabGeometria =
+                new Tab("Geometría");
+
+        // Paneles principales
+        VBox panelFunciones =
+                new VBox(10);
+
+        VBox panelGeometria =
+                new VBox(10);
+
+        // =========================
+        // AJUSTE RESPONSIVO
+        // =========================
+
+        // El plano se adapta al tamaño del panel
         planoFunciones.widthProperty().bind(
                 panelFunciones.widthProperty());
 
@@ -100,40 +175,68 @@ public class VentanaPrincipal {
         planoGeometria.heightProperty().bind(
                 panelGeometria.heightProperty()
                         .subtract(50));
-        
+
+        // =========================
+        // CONTENIDO DE PESTAÑAS
+        // =========================
+
         tabFunciones.setContent(panelFunciones);
 
         tabGeometria.setContent(panelGeometria);
-        
-        HBox controlesFunciones = new HBox(10);
-        
-        HBox controlesGeometria = new HBox(10);
-        
+
+        // Barras de controles
+        HBox controlesFunciones =
+                new HBox(10);
+
+        HBox controlesGeometria =
+                new HBox(10);
+
+        // Agregar pestañas
         tabPane.getTabs().addAll(
                 tabFunciones,
-                tabGeometria);
+                tabGeometria
+        );
 
+        // Agregar elementos a panel funciones
         panelFunciones.getChildren().addAll(
-                controlesFunciones, 
-                planoFunciones);
-        
+                controlesFunciones,
+                planoFunciones
+        );
+
+        // Agregar elementos a panel geometría
         panelGeometria.getChildren().addAll(
                 controlesGeometria,
-                planoGeometria);
-        
+                planoGeometria
+        );
+
+        // Permitir que el plano crezca dinámicamente
         VBox.setVgrow(
-        planoFunciones,
-        Priority.ALWAYS);
-        
+                planoFunciones,
+                Priority.ALWAYS
+        );
+
         VBox.setVgrow(
-        planoGeometria,
-        Priority.ALWAYS);
-        
+                planoGeometria,
+                Priority.ALWAYS
+        );
+
+        // =========================
+        // CONTROLES FUNCIONES
+        // =========================
+
         controlesFunciones.getChildren().addAll(
+
                 new Label("f(x)="),
+
                 txtFuncion,
-                btnGraficar);
-        
+
+                btnGraficar
+        );
+
+        // =========================
+        // CONTROLES GEOMETRÍA
+        // =========================
+
         controlesGeometria.getChildren().addAll(
 
                 new Label("H"),
@@ -153,12 +256,16 @@ public class VentanaPrincipal {
 
                 btnActualizar
         );
-        
-        // Evento botón
+
+        // ==================================================
+        // EVENTO BOTÓN ACTUALIZAR GEOMETRÍA
+        // ==================================================
+
         btnActualizar.setOnAction(e -> {
 
             try {
 
+                // Actualizar datos del círculo
                 circulo.setH(
                         Double.parseDouble(
                                 txtH.getText()
@@ -177,6 +284,7 @@ public class VentanaPrincipal {
                         )
                 );
 
+                // Actualizar datos de la recta
                 recta.setM(
                         Double.parseDouble(
                                 txtM.getText()
@@ -189,9 +297,13 @@ public class VentanaPrincipal {
                         )
                 );
 
+                // Redibujar plano
                 planoGeometria.refrescar();
 
-            } catch (Exception ex) {
+            }
+
+            // Manejo de errores
+            catch (Exception ex) {
 
                 Alert alerta =
                         new Alert(Alert.AlertType.ERROR);
@@ -209,19 +321,30 @@ public class VentanaPrincipal {
                 alerta.showAndWait();
             }
         });
-        // Evento botón
+
+        // ==================================================
+        // EVENTO BOTÓN GRAFICAR FUNCIÓN
+        // ==================================================
+
         btnGraficar.setOnAction(e -> {
 
             try {
 
+                // Obtener expresión ingresada
                 String expresion =
                         txtFuncion.getText();
 
-                FuncionExpresion funcion = new FuncionExpresion(expresion);
+                // Crear función dinámica
+                FuncionExpresion funcion =
+                        new FuncionExpresion(expresion);
 
+                // Actualizar gráfica
                 planoFunciones.actualizarGrafica(funcion);
 
-            } catch (Exception ex) {
+            }
+
+            // Manejo de errores
+            catch (Exception ex) {
 
                 Alert alerta =
                         new Alert(Alert.AlertType.ERROR);
@@ -240,16 +363,26 @@ public class VentanaPrincipal {
             }
         });
 
+        // =========================
+        // ESTRUCTURA FINAL
+        // =========================
+
         root.setTop(controles);
 
         root.setCenter(tabPane);
 
-        Scene scene = new Scene(root, 1000, 700);
+        // Crear escena principal
+        Scene scene =
+                new Scene(root, 1000, 700);
 
-        stage.setTitle("Graficador Matemático (InfinityMath)");
+        // Configuración de ventana
+        stage.setTitle(
+                "Graficador Matemático (InfinityMath)"
+        );
 
         stage.setScene(scene);
 
+        // Mostrar ventana
         stage.show();
     }
 }

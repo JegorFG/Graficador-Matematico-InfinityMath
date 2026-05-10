@@ -20,53 +20,112 @@ import javafx.scene.paint.Color;
 import math.Funcion;
 import math.FuncionCuadratica;
 
+/**
+ * Clase encargada de representar y dibujar un plano cartesiano.
+ *
+ * Esta clase hereda de Canvas de JavaFX y permite:
+ *
+ * - Dibujar el plano cartesiano.
+ * - Graficar funciones matemáticas.
+ * - Detectar raíces y extremos.
+ * - Dibujar objetos geométricos.
+ * - Detectar intersecciones entre figuras.
+ * - Aplicar zoom mediante la rueda del mouse.
+ */
 public class PlanoCartesiano extends Canvas {
-    
+
+    /**
+     * Indica si el plano se encuentra en modo funciones.
+     * Si es false, solamente se dibujan objetos matemáticos.
+     */
     private boolean modoFunciones = true;
 
+    /**
+     * Contexto gráfico utilizado para dibujar sobre el Canvas.
+     */
     private GraphicsContext gc;
-    
+
+    /**
+     * Escala del plano cartesiano.
+     * Controla el tamaño visual de las unidades.
+     */
     private double escala = 40;
-    
+
+    /**
+     * Función matemática actualmente graficada.
+     */
     private Funcion funcionActual;
-    
+
+    /**
+     * Lista de objetos matemáticos dibujados en el plano.
+     */
     private List<ObjetoMatematico> objetos = new ArrayList<>();
 
+    /**
+     * Constructor del plano cartesiano.
+     *
+     * @param ancho Ancho del canvas.
+     * @param alto Alto del canvas.
+     */
     public PlanoCartesiano(double ancho, double alto) {
 
+        // Inicializa el canvas con el tamaño recibido
         super(ancho, alto);
 
+        // Obtiene el contexto gráfico
         gc = getGraphicsContext2D();
 
+        // Dibuja el plano inicialmente
         dibujarPlano();
 
+        // Función inicial por defecto
         Funcion funcion = new FuncionCuadratica(1, 0, 0);
 
+        // Grafica la función inicial
         actualizarGrafica(funcion);
-        
+
+        /**
+         * Evento de scroll para aplicar zoom.
+         */
         this.setOnScroll(e -> {
 
+            // Zoom in
             if (e.getDeltaY() > 0) {
                 escala += 5;
-            } else {
+            }
+
+            // Zoom out
+            else {
                 escala -= 5;
             }
 
-            // evitar escala negativa
+            // Evita valores negativos o demasiado pequeños
             if (escala < 5) {
                 escala = 5;
             }
 
+            // Redibuja todo el plano
             redibujar();
         });
     }
 
+    /**
+     * Dibuja el plano cartesiano completo.
+     */
     private void dibujarPlano() {
-        
+
+        /**
+         * Listener para redibujar automáticamente
+         * cuando cambia el ancho.
+         */
         widthProperty().addListener(e -> {
             redibujar();
         });
 
+        /**
+         * Listener para redibujar automáticamente
+         * cuando cambia el alto.
+         */
         heightProperty().addListener(e -> {
             redibujar();
         });
@@ -74,14 +133,19 @@ public class PlanoCartesiano extends Canvas {
         double ancho = getWidth();
         double alto = getHeight();
 
+        // Centro del plano
         double centroX = ancho / 2;
         double centroY = alto / 2;
 
+        // =========================
         // Fondo
+        // =========================
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, ancho, alto);
 
+        // =========================
         // Cuadrícula
+        // =========================
         gc.setStroke(Color.LIGHTGRAY);
 
         // Líneas verticales
@@ -102,17 +166,25 @@ public class PlanoCartesiano extends Canvas {
             gc.strokeLine(0, y, ancho, y);
         }
 
+        // =========================
+        // Ejes principales
+        // =========================
+
         // Eje X
         gc.setStroke(Color.BLACK);
         gc.strokeLine(0, centroY, ancho, centroY);
 
         // Eje Y
         gc.strokeLine(centroX, 0, centroX, alto);
-        
+
+        // =========================
         // Numeración eje X
+        // =========================
         gc.setFill(Color.BLACK);
+
         for (int i = -20; i <= 20; i++) {
 
+            // Evita dibujar el cero
             if (i == 0) continue;
 
             double x = convertirX(i);
@@ -124,7 +196,9 @@ public class PlanoCartesiano extends Canvas {
             );
         }
 
+        // =========================
         // Numeración eje Y
+        // =========================
         for (int i = -20; i <= 20; i++) {
 
             double y = convertirY(i);
@@ -136,11 +210,17 @@ public class PlanoCartesiano extends Canvas {
             );
         }
     }
-    
+
+    /**
+     * Grafica una función matemática.
+     *
+     * @param funcion Función a dibujar.
+     */
     private void graficarFuncion(Funcion funcion) {
 
         gc.setStroke(Color.RED);
 
+        // Precisión del dibujo
         double paso = 0.1;
 
         double xAnterior = -10;
@@ -150,12 +230,14 @@ public class PlanoCartesiano extends Canvas {
 
             double y = funcion.evaluar(x);
 
+            // Conversión a coordenadas de pantalla
             double pantallaX1 = convertirX(xAnterior);
             double pantallaY1 = convertirY(yAnterior);
 
             double pantallaX2 = convertirX(x);
             double pantallaY2 = convertirY(y);
 
+            // Dibuja segmentos consecutivos
             gc.strokeLine(
                     pantallaX1,
                     pantallaY1,
@@ -167,7 +249,14 @@ public class PlanoCartesiano extends Canvas {
             yAnterior = y;
         }
     }
-    
+
+    /**
+     * Detecta raíces aproximadas de una función.
+     *
+     * Una raíz ocurre cuando la función cambia de signo.
+     *
+     * @param funcion Función a analizar.
+     */
     private void detectarRaices(Funcion funcion) {
 
         gc.setFill(Color.BLUE);
@@ -177,18 +266,16 @@ public class PlanoCartesiano extends Canvas {
         for (double x = -100; x < 100; x += paso) {
 
             double y1 = funcion.evaluar(x);
-
             double y2 = funcion.evaluar(x + paso);
 
-            // cambio de signo
+            // Detecta cambio de signo
             if ((y1 < 0 && y2 > 0)
                     || (y1 > 0 && y2 < 0)) {
 
                 double pantallaX = convertirX(x);
-
                 double pantallaY = convertirY(0);
 
-                // dibujar punto
+                // Punto raíz
                 gc.fillOval(
                         pantallaX - 5,
                         pantallaY - 5,
@@ -196,7 +283,7 @@ public class PlanoCartesiano extends Canvas {
                         10
                 );
 
-                // mostrar valor aproximado
+                // Mostrar aproximación
                 gc.fillText(
                         String.format("%.2f", x),
                         pantallaX + 5,
@@ -205,7 +292,12 @@ public class PlanoCartesiano extends Canvas {
             }
         }
     }
-    
+
+    /**
+     * Actualiza completamente la gráfica actual.
+     *
+     * @param funcion Nueva función a graficar.
+     */
     public void actualizarGrafica(Funcion funcion) {
 
         this.funcionActual = funcion;
@@ -213,16 +305,20 @@ public class PlanoCartesiano extends Canvas {
         dibujarPlano();
 
         graficarFuncion(funcion);
-        
+
         detectarRaices(funcion);
-        
+
         detectarExtremos(funcion);
     }
-    
+
+    /**
+     * Redibuja completamente el plano.
+     */
     private void redibujar() {
 
         dibujarPlano();
 
+        // Si está en modo funciones
         if (modoFunciones && funcionActual != null) {
 
             graficarFuncion(funcionActual);
@@ -232,7 +328,7 @@ public class PlanoCartesiano extends Canvas {
             detectarExtremos(funcionActual);
         }
 
-        // dibujar objetos matemáticos
+        // Dibuja objetos matemáticos
         for (ObjetoMatematico obj : objetos) {
 
             obj.dibujar(
@@ -242,7 +338,10 @@ public class PlanoCartesiano extends Canvas {
                     getHeight() / 2
             );
         }
-        
+
+        /**
+         * Detecta intersecciones entre círculos y rectas.
+         */
         for (ObjetoMatematico o1 : objetos) {
 
             for (ObjetoMatematico o2 : objetos) {
@@ -256,19 +355,37 @@ public class PlanoCartesiano extends Canvas {
         }
     }
 
+    // =========================
     // MÉTODOS DE CONVERSIÓN
+    // =========================
+
+    /**
+     * Convierte coordenadas matemáticas X
+     * a coordenadas de pantalla.
+     */
     private double convertirX(double x) {
+
         double centroX = getWidth() / 2;
 
         return centroX + (x * escala);
     }
 
+    /**
+     * Convierte coordenadas matemáticas Y
+     * a coordenadas de pantalla.
+     */
     private double convertirY(double y) {
+
         double centroY = getHeight() / 2;
 
         return centroY - (y * escala);
     }
-    
+
+    /**
+     * Detecta máximos y mínimos locales.
+     *
+     * @param funcion Función a analizar.
+     */
     private void detectarExtremos(Funcion funcion) {
 
         gc.setFill(Color.GREEN);
@@ -286,14 +403,14 @@ public class PlanoCartesiano extends Canvas {
             double ySiguiente =
                     funcion.evaluar(x + paso);
 
-            // mínimo
+            // Mínimo local
             if (yActual < yAnterior
                     && yActual < ySiguiente) {
 
                 marcarExtremo(x, yActual, "Min");
             }
 
-            // máximo
+            // Máximo local
             if (yActual > yAnterior
                     && yActual > ySiguiente) {
 
@@ -301,7 +418,10 @@ public class PlanoCartesiano extends Canvas {
             }
         }
     }
-    
+
+    /**
+     * Dibuja un punto extremo.
+     */
     private void marcarExtremo(double x, double y, String tipo) {
 
         double pantallaX = convertirX(x);
@@ -325,26 +445,38 @@ public class PlanoCartesiano extends Canvas {
                 pantallaY - 10
         );
     }
-    
+
+    /**
+     * Agrega un objeto matemático al plano.
+     */
     public void agregarObjeto(ObjetoMatematico objeto) {
 
         objetos.add(objeto);
 
         redibujar();
     }
-    
+
+    /**
+     * Detecta intersecciones exactas
+     * entre un círculo y una recta.
+     */
     private void detectarInterseccionesExactas(Circulo circulo, Recta recta) {
 
+        // Centro y radio del círculo
         double h = circulo.getH();
         double k = circulo.getK();
         double r = circulo.getRadio();
 
+        // Pendiente y término independiente
         double m = recta.getM();
         double b = recta.getB();
 
-        // coeficientes cuadrática
-        double A =
-                1 + Math.pow(m, 2);
+        /**
+         * Construcción de ecuación cuadrática
+         * derivada de sustituir la recta
+         * en la ecuación del círculo.
+         */
+        double A = 1 + Math.pow(m, 2);
 
         double B =
                 (2 * m * (b - k))
@@ -355,19 +487,23 @@ public class PlanoCartesiano extends Canvas {
                 + Math.pow(b - k, 2)
                 - Math.pow(r, 2);
 
+        // Discriminante
         double discriminante =
                 Math.pow(B, 2)
                 - (4 * A * C);
 
         gc.setFill(Color.PURPLE);
-        
+
         String tipoRecta = "";
 
         String descripcion = "";
-        
+
+        // Tolerancia para errores decimales
         double epsilon = 0.0001;
 
-        // SECANTE
+        // =========================
+        // RECTA SECANTE
+        // =========================
         if (discriminante > epsilon) {
 
             double x1 =
@@ -391,10 +527,11 @@ public class PlanoCartesiano extends Canvas {
             tipoRecta = "RECTA SECANTE";
 
             descripcion = "Interseca el círculo en 2 puntos.";
-
         }
 
-        // TANGENTE
+        // =========================
+        // RECTA TANGENTE
+        // =========================
         else if (Math.abs(discriminante) <= epsilon) {
 
             double x =
@@ -410,23 +547,34 @@ public class PlanoCartesiano extends Canvas {
             descripcion = "Toca el círculo en 1 punto.";
         }
 
-        // EXTERIOR
+        // =========================
+        // RECTA EXTERIOR
+        // =========================
         else {
 
             tipoRecta = "RECTA EXTERIOR";
 
             descripcion = "No intersecta el círculo.";
         }
-        
+
+        // Mostrar información
         gc.setFill(Color.BLACK);
 
         gc.fillText(tipoRecta, 20, 20);
 
-        gc.fillText( "Δ = " + String.format("%.2f", discriminante), 20, 40);
+        gc.fillText(
+                "Δ = "
+                + String.format("%.2f", discriminante),
+                20,
+                40
+        );
 
         gc.fillText(descripcion, 20, 60);
     }
-    
+
+    /**
+     * Dibuja un punto de intersección.
+     */
     private void dibujarPuntoInterseccion(double x, double y) {
 
         double pantallaX =
@@ -442,49 +590,17 @@ public class PlanoCartesiano extends Canvas {
                 10
         );
     }
-    
-    /*private void detectarIntersecciones(Circulo circulo, Recta recta) {
 
-        gc.setFill(Color.PURPLE);
-
-        double paso = 0.1;
-
-        for (double x = -100; x <= 100; x += paso) {
-
-            double yRecta =
-                    (recta.getM() * x)
-                    + recta.getB();
-
-            double distancia =
-                    Math.pow(x - circulo.getH(), 2)
-                    + Math.pow(yRecta - circulo.getK(), 2);
-
-            double radio2 =
-                    Math.pow(circulo.getRadio(), 2);
-
-            // aproximación
-            if (Math.abs(distancia - radio2) < 0.5) {
-
-                double pantallaX =
-                        convertirX(x);
-
-                double pantallaY =
-                        convertirY(yRecta);
-
-                gc.fillOval(
-                        pantallaX - 5,
-                        pantallaY - 5,
-                        10,
-                        10
-                );
-            }
-        }
-    }*/
-    
+    /**
+     * Fuerza el redibujado del plano.
+     */
     public void refrescar() {
         redibujar();
     }
 
+    /**
+     * Activa o desactiva el modo funciones.
+     */
     public void setModoFunciones(boolean modoFunciones) {
         this.modoFunciones = modoFunciones;
     }
