@@ -8,7 +8,7 @@
  *
  * @author Jegor InfinitySoftware
  */
-package math;
+package com.infinitymath.math;
 
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;

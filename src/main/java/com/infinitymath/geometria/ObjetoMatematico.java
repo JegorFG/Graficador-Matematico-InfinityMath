@@ -7,7 +7,7 @@
  *
  * @author Jegor InfinitySoftware
  */
-package geometria;
+package com.infinitymath.geometria;
 
 import javafx.scene.canvas.GraphicsContext;
 

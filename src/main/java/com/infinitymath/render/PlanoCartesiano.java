@@ -2,23 +2,27 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package render;
+package com.infinitymath.render;
 
 /**
  *
  * @author Jegor InfinitySoftware
  */
 
-import geometria.Circulo;
-import geometria.ObjetoMatematico;
-import geometria.Recta;
+import com.infinitymath.geometria.Circulo;
+import com.infinitymath.geometria.ObjetoMatematico;
+import com.infinitymath.geometria.Recta;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import math.Funcion;
-import math.FuncionCuadratica;
+import com.infinitymath.math.Funcion;
+import com.infinitymath.math.FuncionCuadratica;
+import com.infinitymath.util.InformacionMatematica;
+import com.infinitymath.util.ModoPlano;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Clase encargada de representar y dibujar un plano cartesiano.
@@ -33,12 +37,14 @@ import math.FuncionCuadratica;
  * - Aplicar zoom mediante la rueda del mouse.
  */
 public class PlanoCartesiano extends Canvas {
+    
+    private Set<InformacionMatematica> informacion = new HashSet<>();
 
     /**
      * Indica si el plano se encuentra en modo funciones.
      * Si es false, solamente se dibujan objetos matemáticos.
      */
-    private boolean modoFunciones = true;
+    private ModoPlano modoPlano = ModoPlano.FUNCIONES;
 
     /**
      * Contexto gráfico utilizado para dibujar sobre el Canvas.
@@ -317,9 +323,11 @@ public class PlanoCartesiano extends Canvas {
     private void redibujar() {
 
         dibujarPlano();
+        
+        informacion.clear();
 
         // Si está en modo funciones
-        if (modoFunciones && funcionActual != null) {
+        if ((modoPlano == ModoPlano.FUNCIONES || modoPlano == ModoPlano.MIXTO) && funcionActual != null) {
 
             graficarFuncion(funcionActual);
 
@@ -329,27 +337,32 @@ public class PlanoCartesiano extends Canvas {
         }
 
         // Dibuja objetos matemáticos
-        for (ObjetoMatematico obj : objetos) {
+        if (modoPlano == ModoPlano.GEOMETRIA || modoPlano == ModoPlano.MIXTO) {
 
-            obj.dibujar(
-                    gc,
-                    escala,
-                    getWidth() / 2,
-                    getHeight() / 2
-            );
+            for (ObjetoMatematico obj : objetos) {
+
+                obj.dibujar(
+                        gc,
+                        escala,
+                        getWidth() / 2,
+                        getHeight() / 2
+                );
+            }
         }
 
         /**
          * Detecta intersecciones entre círculos y rectas.
          */
-        for (ObjetoMatematico o1 : objetos) {
+        if (modoPlano == ModoPlano.GEOMETRIA || modoPlano == ModoPlano.MIXTO) {
+            
+            for (ObjetoMatematico o1 : objetos) {
 
-            for (ObjetoMatematico o2 : objetos) {
+                for (ObjetoMatematico o2 : objetos) {
 
-                if (o1 instanceof Circulo c
-                        && o2 instanceof Recta r) {
+                    if (o1 instanceof Circulo c && o2 instanceof Recta r) {
 
-                    detectarInterseccionesExactas(c, r);
+                        detectarInterseccionesExactas(c, r);
+                    }
                 }
             }
         }
@@ -557,19 +570,11 @@ public class PlanoCartesiano extends Canvas {
             descripcion = "No intersecta el círculo.";
         }
 
-        // Mostrar información
-        gc.setFill(Color.BLACK);
-
-        gc.fillText(tipoRecta, 20, 20);
-
-        gc.fillText(
-                "Δ = "
-                + String.format("%.2f", discriminante),
-                20,
-                40
-        );
-
-        gc.fillText(descripcion, 20, 60);
+        // Almacenar información
+        // HashSet evita duplicados automáticamente
+        informacion.add(new InformacionMatematica(tipoRecta, "Δ = "
+                + String.format("%.2f", discriminante)
+                + "\n" + descripcion));
     }
 
     /**
@@ -601,7 +606,46 @@ public class PlanoCartesiano extends Canvas {
     /**
      * Activa o desactiva el modo funciones.
      */
-    public void setModoFunciones(boolean modoFunciones) {
-        this.modoFunciones = modoFunciones;
+    public void setModoPlano(ModoPlano modoPlano) {
+
+        this.modoPlano = modoPlano;
+
+        redibujar();
+    }
+    
+    public void limpiarObjetos() {
+
+        objetos.clear();
+        
+        //Limpio mi lista de información
+        informacion.clear();
+
+        redibujar();
+    }
+    
+    public void limpiarFuncion() {
+
+        funcionActual = null;
+        
+        //Limpio mi lista de información
+        informacion.clear();
+
+        redibujar();
+    }
+    
+    public void limpiarTodo() {
+
+        objetos.clear();
+
+        funcionActual = null;
+
+        //Limpio mi lista de información
+        informacion.clear();
+
+        redibujar();
+    }
+
+    public Set<InformacionMatematica> getInformacion() {
+        return informacion;
     }
 }

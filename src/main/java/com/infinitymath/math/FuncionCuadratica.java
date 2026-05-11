@@ -7,7 +7,7 @@
  *
  * @author chuss
  */
-package math;
+package com.infinitymath.math;
 
 public class FuncionCuadratica extends Funcion {
 

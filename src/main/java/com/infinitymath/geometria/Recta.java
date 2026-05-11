@@ -7,8 +7,9 @@
  *
  * @author Jegor InfinitySoftware
  */
-package geometria;
+package com.infinitymath.geometria;
 
+import com.infinitymath.geometria.ObjetoMatematico;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
